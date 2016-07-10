@@ -11,7 +11,7 @@ wchar_t* dbgData[512] = { 0 };
 
 void writeTestData()
 {
-	TileInfo* tinfo = calloc(3, sizeof(TileInfo));
+	TileInfo* tinfo = calloc(4, sizeof(TileInfo));
 
 	strcpy_s(tinfo[0].spritePath, sizeof(tinfo[0].spritePath) - 1, "platform.bmp");
 	tinfo[0].identifier = 0;
@@ -24,10 +24,21 @@ void writeTestData()
 	tinfo[2].identifier = 2;
 	tinfo[2].is_dangerous = 1;
 
+	strcpy_s(tinfo[3].spritePath, sizeof(tinfo[3].spritePath) - 1, "enemy1.bmp");
+	tinfo[3].identifier = 3;
+
+	tinfo[3].is_dangerous = TRUE;
+	tinfo[3].is_enemy = TRUE;
+
+	tinfo[3].movementData1.x = 220;
+	tinfo[3].movementData1.y = 240;
+
+	tinfo[3].movementData2.x = 120;
+	tinfo[3].movementData2.y = 240;
+
 	FILE* tinfoFp;
 	fopen_s(&tinfoFp, "tileinfo.bin", "wb");
-
-	fwrite(tinfo, sizeof(TileInfo), 3, tinfoFp);
+	fwrite(tinfo, sizeof(TileInfo), 4, tinfoFp);
 	fclose(tinfoFp);
 
 	//576 bytes
@@ -44,6 +55,7 @@ long getFileSize(FILE* fp)
 	{
 		swprintf_s(dbgData, sizeof(dbgData) / sizeof(wchar_t), unableToOpenFmt, "getFileSize");
 		OutputDebugString(dbgData);
+		assert(fp);
 	}
 
 	rewind(fp);
@@ -51,6 +63,31 @@ long getFileSize(FILE* fp)
 	long size = ftell(fp);
 	rewind(fp);
 	return size;
+}
+
+BOOL loadTileData(Level* level)
+{
+	FILE* fp;
+	fopen_s(&fp, level->tileFile, "rb");
+	if (!fp)
+	{
+		swprintf_s(dbgData, sizeof(dbgData) / sizeof(wchar_t), unableToOpenFmt, level->tileFile);
+		OutputDebugString(dbgData);
+		assert(fp);
+	}
+
+	long tileFileSize = getFileSize(fp);
+	int numTiles = tileFileSize / sizeof(TileInfo);
+	TileInfo* tiList = calloc(numTiles, sizeof(TileInfo));
+	fread_s(tiList, tileFileSize, sizeof(TileInfo), numTiles, fp);
+	fclose(fp);
+
+	level->tileCount = numTiles;
+	for (int i = 0; i < numTiles; i++)
+		tiList[i].bitmap = getBitMapData(tiList[i].spritePath);
+	level->tiles = tiList;
+
+	return TRUE;
 }
 
 BOOL loadLevel(Level* level)
@@ -84,11 +121,12 @@ unsigned int* getBitMapData(char* path)
 	{
 		swprintf_s(dbgData, sizeof(dbgData) / sizeof(wchar_t), unableToOpenFmt, path);
 		OutputDebugString(dbgData);
+		assert(fp);
 	}
 
 	long headerlessSize = getFileSize(fp) - 54;
 	unsigned int* rgb = calloc(headerlessSize / 3, sizeof(int));
-	fseek(fp, 54, SEEK_SET);
+	fseek(fp, 54, SEEK_SET); //skip header
 
 	int z = 0;
 	for (int j = 0; j < headerlessSize; j += 3)
@@ -100,30 +138,6 @@ unsigned int* getBitMapData(char* path)
 		z++;
 	}
 	return rgb;
-}
-
-BOOL loadTileData(Level* level)
-{
-	FILE* fp;
-	fopen_s(&fp, level->tileFile, "rb");
-	if (!fp)
-	{
-		swprintf_s(dbgData, sizeof(dbgData) / sizeof(wchar_t), unableToOpenFmt, level->tileFile);
-		OutputDebugString(dbgData);
-	}
-
-	long tileFileSize = getFileSize(fp);
-	int numTiles = tileFileSize / sizeof(TileInfo);
-	TileInfo* tiList = calloc(numTiles, sizeof(TileInfo));
-	fread_s(tiList, tileFileSize, sizeof(TileInfo), numTiles, fp);
-	fclose(fp);
-
-	level->tileCount = numTiles;
-	for (int i = 0; i < numTiles; i++)
-		tiList[i].bitmap = getBitMapData(tiList[i].spritePath);
-	level->tiles = tiList;
-
-	return TRUE;
 }
 
 TileInfo* findTile(Level* level, char id)
@@ -149,9 +163,19 @@ TileInfo* getTileAtPos(Level* level, int y, int x)
 	int roundedY = roundTo(y, SPRITE_HEIGHT) / SPRITE_HEIGHT;
 	int roundedX = roundTo(x, SPRITE_WIDTH) / SPRITE_WIDTH;
 
+	TileInfo* tile = NULL;
+
+	for (int i = 0; i < level->tileCount; i++)
+	{
+		if (!level->tiles[i].is_enemy) continue;
+		if (roundTo(level->tiles[i].pos.x, SPRITE_WIDTH) != roundedX*SPRITE_WIDTH ||
+			roundTo(level->tiles[i].pos.y, SPRITE_HEIGHT) != roundedY*SPRITE_HEIGHT) continue;
+		tile = level->tiles + i;
+		return tile;
+	}
+
 	int index = roundedY * width + roundedX;
 	char below = level->level[index];
-	TileInfo* tile = NULL;
 	tile = findTile(level, below);
 
 	return tile;

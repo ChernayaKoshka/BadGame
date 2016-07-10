@@ -8,6 +8,7 @@
 #include "level.h"
 #include "misc.h"
 #include "player.h"
+#include "enemy.h"
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 360
@@ -76,8 +77,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, WPARAM lParam)
 			}
 			break;
 		}
-		swprintf_s(title, 256, titleFormat, player.pos.x, player.pos.y);
-		SetWindowTextW(details->Window, title);
 		break;
 	default:
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -169,6 +168,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	player.pos.x = 0;
 	player.pos.y = SPRITE_HEIGHT;
 
+	setupEnemies(level);
+
 	unsigned long runCount = 0;
 	while (running)
 	{
@@ -181,6 +182,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		double timePassed = (double)(curTime - prevTime) / CLOCKS_PER_SEC;
 		if (timePassed >= STEPS_PER_SECOND)
 		{
+			swprintf_s(title, 256, titleFormat, player.pos.x, player.pos.y);
+			SetWindowTextW(details->Window, title);
+
 			runCount++;
 			translate(level, details->BackBuffer, details->Width);
 			if (player.isJumping)
@@ -198,11 +202,15 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				if (tile->is_collidable)
 					player.isJumping = FALSE;
 			}
-			else if (runCount % 100 == 0)
+
+			if (runCount % 100 == 0)
 			{
-				changePos(&player, level, player.pos.x, player.pos.y + 1);
+				if (!player.isJumping)
+					changePos(&player, level, player.pos.x, player.pos.y + 1);
+				updateEnemies(level, 2);
 			}
 			writeTile(details->BackBuffer, details->Width, player.pos.x, player.pos.y, playerSprite);
+			displayEnemies(level, details->BackBuffer, details->Width);
 
 			StretchDIBits(details->DC,
 				0, 0, details->Width, details->Height,

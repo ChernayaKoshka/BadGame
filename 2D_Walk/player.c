@@ -12,6 +12,12 @@ BOOL changePos(Player* player, Level* level, int newX, int newY)
 	{
 		return TRUE;
 	}
+	else if (tileAtPos->is_dangerous && tileAtPos->is_enemy)
+	{
+		player->pos.x = 0;
+		player->pos.y = 0;
+		return FALSE;
+	}
 	else if (tileAtPos->is_dangerous)
 	{
 		player->pos.x = 0;

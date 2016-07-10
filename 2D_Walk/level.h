@@ -14,6 +14,11 @@ typedef struct tagTileInfo
 	unsigned int is_dangerous : 1; //lava
 	unsigned int is_ladder : 1;
 	unsigned int is_destructible : 1;
+	unsigned int is_enemy : 1;
+	POINT pos;
+	POINT movementData1;
+	POINT movementData2;
+	BOOL movingLeft;
 }TileInfo;
 
 typedef struct tagLevel
@@ -31,7 +36,9 @@ typedef struct tagLevel
 }Level;
 
 BOOL loadLevel(Level* level);
+
 TileInfo* findTile(Level* level, char id);
+
 unsigned int* getBitMapData(char* path);
 
 BOOL loadTileData(Level* level);
