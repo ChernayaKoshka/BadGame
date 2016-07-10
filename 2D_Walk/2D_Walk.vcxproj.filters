@@ -13,6 +13,10 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Level Resources">
+      <UniqueIdentifier>{755a45a6-4438-47b3-88aa-c4676aaa5ca4}</UniqueIdentifier>
+      <Extensions>*.bin;*.bmp</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -59,5 +63,27 @@
     <ClInclude Include="debug_custom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tileinfo.bin">
+      <Filter>Level Resources</Filter>
+    </None>
+    <None Include="level.bin">
+      <Filter>Level Resources</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="lava.bmp">
+      <Filter>Level Resources</Filter>
+    </Image>
+    <Image Include="platform.bmp">
+      <Filter>Level Resources</Filter>
+    </Image>
+    <Image Include="player.bmp">
+      <Filter>Level Resources</Filter>
+    </Image>
+    <Image Include="sky.bmp">
+      <Filter>Level Resources</Filter>
+    </Image>
   </ItemGroup>
 </Project>

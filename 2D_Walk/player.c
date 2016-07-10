@@ -3,7 +3,7 @@
 BOOL changePos(Player* player, Level* level, int newX, int newY)
 {
 	int roundedY = roundUpTo(newY, SPRITE_HEIGHT);
-	if (roundedY >= level->levelHeight || roundedY < 0 || newX >= level->levelWidth || newX < 0)
+	if (roundedY >= level->levelHeight || roundedY < 0 || newX > level->levelWidth - SPRITE_WIDTH || newX < 0)
 		return TRUE;
 
 	TileInfo* tileAtPos = getTileAtPos(level, roundedY, newX);
@@ -22,4 +22,9 @@ BOOL changePos(Player* player, Level* level, int newX, int newY)
 	player->pos.x = newX;
 	player->pos.y = roundedY;
 	return FALSE;
+}
+
+TileInfo* getTileUnderPlayer(Player* player, Level* level)
+{
+	return getTileAtPos(level, player->pos.y + SPRITE_HEIGHT, player->pos.x);
 }

@@ -17,3 +17,5 @@ typedef struct tagPlayer
 }Player;
 
 BOOL changePos(Player* player, Level* level, int newX, int newY);
+
+TileInfo* getTileUnderPlayer(Player* player, Level* level);

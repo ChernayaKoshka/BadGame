@@ -68,7 +68,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, WPARAM lParam)
 			changePos(&player, level, player.pos.x + 5, player.pos.y);
 			break;
 		case VK_SPACE:
-			if (!player.isJumping && getTileAtPos(level, player.pos.y + SPRITE_HEIGHT, player.pos.x)->is_collidable)
+			if (!player.isJumping && getTileUnderPlayer(&player, level)->is_collidable)
 			{
 				changePos(&player, level, player.pos.x, player.pos.y - SPRITE_HEIGHT * 2);
 				player.isJumping = TRUE;
@@ -193,7 +193,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				if (player.jumpTimer == 1000)
 					changePos(&player, level, player.pos.x, player.pos.y + SPRITE_HEIGHT);
 
-				TileInfo* tile = getTileAtPos(level, player.pos.y + SPRITE_HEIGHT, player.pos.x);
+				TileInfo* tile = getTileUnderPlayer(&player, level);
 
 				if (tile->is_collidable)
 					player.isJumping = FALSE;
