@@ -1,2 +1,2 @@
 # BadGame
-Bad code, Bad Games. FatherFoxxy^tm.
+Bad code, Bad Games. FatherFoxxy™.
