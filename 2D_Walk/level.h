@@ -41,3 +41,7 @@ BOOL translate(Level* level, int* buffer, int bufferWidth);
 void writeTile(int* buffer, int bufferWidth, int x, int y, TileInfo* tile);
 
 TileInfo* getTileAtPos(Level* level, int y, int x);
+
+#if _DEBUG
+void writeTestData();
+#endif

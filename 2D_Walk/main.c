@@ -142,111 +142,28 @@ WindowDetails* DefineWindow(HINSTANCE hInstance, int width, int height, wchar_t*
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
-	wchar_t* fmt = L"%d round = %d\n";
-	wchar_t str[256] = { 0 };
-	for (int i = 0; i <= 100; i++)
-	{
-		swprintf_s(str, 256, fmt, i, roundTo(i, 20));
-		OutputDebugString(str);
-	}
-
 	details = DefineWindow(hInstance, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_CLASS, WINDOW_TITLE, nShowCmd);
 
 	MSG msg;
 	clock_t prevTime = clock();
 
-	TileInfo* tinfo = calloc(3, sizeof(TileInfo));
-
-	tinfo[0].identifier = 0;
-	tinfo[0].is_collidable = 1;
-
-	tinfo[0].spritePath[0] = 'p';
-	tinfo[0].spritePath[1] = 'l';
-	tinfo[0].spritePath[2] = 'a';
-	tinfo[0].spritePath[3] = 't';
-	tinfo[0].spritePath[4] = 'f';
-	tinfo[0].spritePath[5] = 'o';
-	tinfo[0].spritePath[6] = 'r';
-	tinfo[0].spritePath[7] = 'm';
-	tinfo[0].spritePath[8] = '.';
-	tinfo[0].spritePath[9] = 'b';
-	tinfo[0].spritePath[10] = 'm';
-	tinfo[0].spritePath[11] = 'p';
-	tinfo[0].spritePath[12] = '\0';
-
-	tinfo[1].identifier = 1;
-
-	tinfo[1].spritePath[0] = 's';
-	tinfo[1].spritePath[1] = 'k';
-	tinfo[1].spritePath[2] = 'y';
-	tinfo[1].spritePath[3] = '.';
-	tinfo[1].spritePath[4] = 'b';
-	tinfo[1].spritePath[5] = 'm';
-	tinfo[1].spritePath[6] = 'p';
-	tinfo[1].spritePath[7] = '\0';
-
-	tinfo[2].identifier = 2;
-	tinfo[2].is_dangerous = 1;
-
-	tinfo[2].spritePath[0] = 'l';
-	tinfo[2].spritePath[1] = 'a';
-	tinfo[2].spritePath[2] = 'v';
-	tinfo[2].spritePath[3] = 'a';
-	tinfo[2].spritePath[4] = '.';
-	tinfo[2].spritePath[5] = 'b';
-	tinfo[2].spritePath[6] = 'm';
-	tinfo[2].spritePath[7] = 'p';
-	tinfo[2].spritePath[8] = '\0';
-
-	FILE* tinfoFp;
-	fopen_s(&tinfoFp, "tileinfo.bin", "wb");
-
-	fwrite(tinfo, sizeof(TileInfo), 3, tinfoFp);
-	fclose(tinfoFp);
+#if _DEBUG
+	writeTestData();
+#endif
 
 	level = calloc(1, sizeof(Level));
+
+	strcpy_s(level->levelFile, sizeof(level->levelFile) - 1, "level.bin");
+	strcpy_s(level->tileFile, sizeof(level->tileFile) - 1, "tileinfo.bin");
+
 	level->levelWidth = WINDOW_WIDTH;
 	level->levelHeight = WINDOW_HEIGHT;
-
-	level->levelFile[0] = 'l';
-	level->levelFile[1] = 'e';
-	level->levelFile[2] = 'v';
-	level->levelFile[3] = 'e';
-	level->levelFile[4] = 'l';
-	level->levelFile[5] = '.';
-	level->levelFile[6] = 'b';
-	level->levelFile[7] = 'i';
-	level->levelFile[8] = 'n';
-	level->levelFile[9] = '\0';
-
-	level->tileFile[0] = 't';
-	level->tileFile[1] = 'i';
-	level->tileFile[2] = 'l';
-	level->tileFile[3] = 'e';
-	level->tileFile[4] = 'i';
-	level->tileFile[5] = 'n';
-	level->tileFile[6] = 'f';
-	level->tileFile[7] = 'o';
-	level->tileFile[8] = '.';
-	level->tileFile[9] = 'b';
-	level->tileFile[10] = 'i';
-	level->tileFile[11] = 'n';
-	level->tileFile[12] = '\0';
 
 	loadLevel(level);
 
 	TileInfo* playerSprite = calloc(1, sizeof(TileInfo));
-	playerSprite->spritePath[0] = 'p';
-	playerSprite->spritePath[1] = 'l';
-	playerSprite->spritePath[2] = 'a';
-	playerSprite->spritePath[3] = 'y';
-	playerSprite->spritePath[4] = 'e';
-	playerSprite->spritePath[5] = 'r';
-	playerSprite->spritePath[6] = '.';
-	playerSprite->spritePath[7] = 'b';
-	playerSprite->spritePath[8] = 'm';
-	playerSprite->spritePath[9] = 'p';
-	playerSprite->spritePath[10] = '\0';
+	strcpy_s(playerSprite->spritePath, sizeof(playerSprite->spritePath) - 1, "player.bmp");
+
 	playerSprite->bitmap = getBitMapData(playerSprite->spritePath);
 
 	player.pos.x = 0;
