@@ -1,3 +1,5 @@
 #pragma once
 
 #define STEPS_PER_SECOND 0.05
+
+#define DISPLAY_COLLISION_PROCESS 1
