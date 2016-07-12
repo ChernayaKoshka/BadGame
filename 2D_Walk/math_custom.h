@@ -40,3 +40,4 @@ double getDistance(POINT p1, POINT p2);
 
 int roundTo(int numToRound, int multiple);
 int roundUpTo(int numToRound, int multiple);
+int roundDownTo(int numToRound, int multiple);

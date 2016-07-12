@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <ShlObj.h>
+#include <process.h>
 #include "math_custom.h"
 #include "globals.h"
 #include "drawing.h"
@@ -9,6 +10,7 @@
 #include "misc.h"
 #include "player.h"
 #include "enemy.h"
+#include "screen.h"
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 360
@@ -20,15 +22,8 @@
 wchar_t* titleFormat = L"(%d,%d)";
 wchar_t title[256] = L"(%d,%d)";
 
-typedef struct tagWindowDetails
-{
-	int Width;
-	int Height;
-	void* BackBuffer;
-	HDC DC;
-	HWND Window;
-	BITMAPINFO BitMapInfo;
-}WindowDetails;
+wchar_t* dbgFmt = L"%d rounds down to %d\n";
+wchar_t dbg[256];
 
 BOOL running = TRUE;
 
@@ -44,6 +39,10 @@ Level* level;
 Player player = { 0 };
 
 WindowDetails* details;
+
+TileInfo* dbgTile;
+
+POINT dbgTilePos;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, WPARAM lParam)
 {
@@ -71,9 +70,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, WPARAM lParam)
 		case VK_SPACE:
 			if (!player.isJumping && getTileUnderPlayer(&player, level)->is_collidable)
 			{
-				changePos(&player, level, player.pos.x, player.pos.y - SPRITE_HEIGHT * 2);
+				player.jumpHeight = PLAYER_JUMP_HEIGHT;
+				changePos(&player, level, player.pos.x, (player.pos.y - PLAYER_JUMP_HEIGHT));
 				player.isJumping = TRUE;
-				player.jumpTimer = 2000;
 			}
 			break;
 		}
@@ -143,7 +142,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 {
 	details = DefineWindow(hInstance, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_CLASS, WINDOW_TITLE, nShowCmd);
 
-	MSG msg;
 	clock_t prevTime = clock();
 
 #if _DEBUG
@@ -166,10 +164,26 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	playerSprite->bitmap = getBitMapData(playerSprite->spritePath);
 
 	player.pos.x = 0;
-	player.pos.y = SPRITE_HEIGHT;
+	player.pos.y = 200;
+
+	player.collisionPoints[0].x = 0;
+	player.collisionPoints[0].y = 0;
+
+	player.collisionPoints[1].x = 0;
+	player.collisionPoints[1].y = SPRITE_HEIGHT - 1;
+
+	player.collisionPoints[2].x = SPRITE_WIDTH - 1;
+	player.collisionPoints[2].y = 0;
+
+	player.collisionPoints[3].x = SPRITE_WIDTH - 1;
+	player.collisionPoints[3].y = SPRITE_HEIGHT - 1;
+
+	dbgTile = calloc(1, sizeof(TileInfo));
+	dbgTile->bitmap = getBitMapData("debug_tile.bmp");
 
 	setupEnemies(level);
 
+	MSG msg;
 	unsigned long runCount = 0;
 	while (running)
 	{
@@ -178,6 +192,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
 		}
+
 		clock_t curTime = clock();
 		double timePassed = (double)(curTime - prevTime) / CLOCKS_PER_SEC;
 		if (timePassed >= STEPS_PER_SECOND)
@@ -186,32 +201,20 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			SetWindowTextW(details->Window, title);
 
 			runCount++;
-			translate(level, details->BackBuffer, details->Width);
-			if (player.isJumping)
-			{
-				if (player.jumpTimer <= 0)
-					player.isJumping = FALSE;
-
-				player.jumpTimer--;
-
-				if (player.jumpTimer == 1000)
-					changePos(&player, level, player.pos.x, player.pos.y + SPRITE_HEIGHT);
-
-				TileInfo* tile = getTileUnderPlayer(&player, level);
-
-				if (tile->is_collidable)
-					player.isJumping = FALSE;
-			}
 
 			if (runCount % 100 == 0)
 			{
-				if (!player.isJumping)
-					changePos(&player, level, player.pos.x, player.pos.y + 1);
 				updateEnemies(level, 2);
 			}
+
+			updatePlayer(&player, level, runCount);
+			translate(level, details->BackBuffer, details->Width);
 			writeTile(details->BackBuffer, details->Width, player.pos.x, player.pos.y, playerSprite);
+			for (int i = 0; i < 4; i++)
+				Plot(player.pos.x + player.collisionPoints[i].x, player.pos.y + player.collisionPoints[i].y, 0x00FFFFFF, details->BackBuffer, details->Width, details->Height);
 			displayEnemies(level, details->BackBuffer, details->Width);
 
+			writeTile(details->BackBuffer, details->Width, dbgTilePos.x, dbgTilePos.y, dbgTile);
 			StretchDIBits(details->DC,
 				0, 0, details->Width, details->Height,
 				0, 0, details->BitMapInfo.bmiHeader.biWidth, Abs(details->BitMapInfo.bmiHeader.biHeight),
@@ -219,5 +222,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				DIB_RGB_COLORS, SRCCOPY);
 		}
 	}
+
 	return EXIT_SUCCESS;
 }

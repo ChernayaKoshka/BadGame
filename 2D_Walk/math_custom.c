@@ -236,3 +236,19 @@ int roundUpTo(int numToRound, int multiple)
 	else
 		return numToRound + multiple - remainder;
 }
+
+//most credit -> http://stackoverflow.com/a/3407254/2396111
+int roundDownTo(int numToRound, int multiple)
+{
+	if (multiple == 0)
+		return numToRound;
+
+	int remainder = abs(numToRound) % multiple;
+	if (remainder == 0)
+		return numToRound;
+
+	if (numToRound < 0)
+		return -(abs(numToRound) + remainder);
+	else
+		return numToRound - remainder;
+}

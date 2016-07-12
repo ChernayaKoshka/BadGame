@@ -77,6 +77,9 @@
     <None Include="level.bin">
       <Filter>Level Resources</Filter>
     </None>
+    <None Include="screen.h">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="lava.bmp">
