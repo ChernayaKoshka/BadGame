@@ -1,17 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include "level.h"
-#include "math_custom.h"
-#include "debug_custom.h"
-#include <assert.h>
 
 wchar_t* unableToOpenFmt = L"Unable to open %hs!";
 wchar_t* dbgData[512] = { 0 };
 
 void writeTestData()
 {
-	TileInfo* tinfo = calloc(4, sizeof(TileInfo));
+	TileInfo* tinfo = calloc(3, sizeof(TileInfo));
 
 	strcpy_s(tinfo[0].spritePath, sizeof(tinfo[0].spritePath) - 1, "platform.bmp");
 	tinfo[0].identifier = 0;
@@ -24,22 +18,30 @@ void writeTestData()
 	tinfo[2].identifier = 2;
 	tinfo[2].is_dangerous = 1;
 
-	strcpy_s(tinfo[3].spritePath, sizeof(tinfo[3].spritePath) - 1, "enemy1.bmp");
-	tinfo[3].identifier = 3;
-
-	tinfo[3].is_dangerous = TRUE;
-	tinfo[3].is_enemy = TRUE;
-
-	tinfo[3].movementData1.x = 220;
-	tinfo[3].movementData1.y = 240;
-
-	tinfo[3].movementData2.x = 120;
-	tinfo[3].movementData2.y = 240;
-
 	FILE* tinfoFp;
 	fopen_s(&tinfoFp, "tileinfo.bin", "wb");
-	fwrite(tinfo, sizeof(TileInfo), 4, tinfoFp);
+	fwrite(tinfo, sizeof(TileInfo), 3, tinfoFp);
 	fclose(tinfoFp);
+
+	EntityInfo* entities = calloc(1, sizeof(EntityInfo));
+
+	strcpy_s(entities[0].spritePath, sizeof(tinfo[0].spritePath) - 1, "enemy1.bmp");
+	entities[0].entityId = 0;
+	entities[0].alliance = 1;
+
+	entities[0].is_dangerous = TRUE;
+	entities[0].is_enemy = TRUE;
+
+	entities[0].movementData1.x = 220;
+	entities[0].movementData1.y = 240;
+
+	entities[0].movementData2.x = 120;
+	entities[0].movementData2.y = 240;
+
+	FILE* entityFp;
+	fopen_s(&entityFp, "entityinfo.bin", "wb");
+	fwrite(entities, sizeof(EntityInfo), 1, entityFp);
+	fclose(entityFp);
 
 	//576 bytes
 	char* levelData = "\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x00\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x02\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x02\x02\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x02\x02\x02\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x02\x02\x02\x02\x01\x01\x01\x01\x01\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x02\x02\x02\x02\x02\x01\x01\x01\x01\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x02\x02\x02\x02\x02\x02\x00\x01\x01\x00\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
@@ -90,6 +92,31 @@ BOOL loadTileData(Level* level)
 	return TRUE;
 }
 
+BOOL loadEntityData(Level* level)
+{
+	FILE* fp;
+	fopen_s(&fp, level->entityFile, "rb");
+	if (!fp)
+	{
+		swprintf_s(dbgData, sizeof(dbgData) / sizeof(wchar_t), unableToOpenFmt, level->entityFile);
+		OutputDebugString(dbgData);
+		assert(fp);
+	}
+
+	long entityFileSize = getFileSize(fp);
+	int numEntities = entityFileSize / sizeof(EntityInfo);
+	EntityInfo* entities = calloc(numEntities, sizeof(EntityInfo));
+	fread_s(entities, entityFileSize, sizeof(EntityInfo), numEntities, fp);
+	fclose(fp);
+
+	level->entityCount = numEntities;
+	for (int i = 0; i < numEntities; i++)
+		entities[i].bitmap = getBitMapData(entities[i].spritePath);
+	level->entities = entities;
+
+	return TRUE;
+}
+
 BOOL loadLevel(Level* level)
 {
 	FILE* fp;
@@ -99,6 +126,7 @@ BOOL loadLevel(Level* level)
 	{
 		swprintf_s(dbgData, sizeof(dbgData) / sizeof(wchar_t), unableToOpenFmt, level->levelFile);
 		OutputDebugString(dbgData);
+		assert(fp);
 	}
 
 	long levelSize = getFileSize(fp);
@@ -109,6 +137,7 @@ BOOL loadLevel(Level* level)
 	fclose(fp);
 
 	loadTileData(level);
+	loadEntityData(level);
 	return TRUE;
 }
 
@@ -149,11 +178,11 @@ TileInfo* findTile(Level* level, char id)
 	return NULL;
 }
 
-void writeTile(int* buffer, int bufferWidth, int x, int y, TileInfo* tile)
+void writeBitmap(int* buffer, int bufferWidth, int x, int y, unsigned int* bitmap)
 {
 	for (int i = 0; i < SPRITE_WIDTH; i++)
 		for (int z = 0; z < SPRITE_HEIGHT; z++)
-			buffer[(y + z)*bufferWidth + i + x] = tile->bitmap[i*SPRITE_WIDTH + z];
+			buffer[(y + z)*bufferWidth + i + x] = bitmap[i*SPRITE_WIDTH + z];
 }
 
 TileInfo* getTileAtPos(Level* level, int y, int x)
@@ -164,15 +193,6 @@ TileInfo* getTileAtPos(Level* level, int y, int x)
 	int roundedX = roundTo(x, SPRITE_WIDTH) / SPRITE_WIDTH;
 
 	TileInfo* tile = NULL;
-
-	for (int i = 0; i < level->tileCount; i++)
-	{
-		if (!level->tiles[i].is_enemy) continue;
-		if (roundTo(level->tiles[i].pos.x, SPRITE_WIDTH) != roundedX*SPRITE_WIDTH ||
-			roundTo(level->tiles[i].pos.y, SPRITE_HEIGHT) != roundedY*SPRITE_HEIGHT) continue;
-		tile = level->tiles + i;
-		return tile;
-	}
 
 	int index = roundedY * width + roundedX;
 	char below = level->level[index];
@@ -187,7 +207,7 @@ BOOL translate(Level* level, int* buffer, int bufferWidth)
 	int y = 0;
 	for (int i = 0; i < level->levelSize; i++)
 	{
-		writeTile(buffer, bufferWidth, x, y, findTile(level, level->level[i]));
+		writeBitmap(buffer, bufferWidth, x, y, findTile(level, level->level[i])->bitmap);
 		x += SPRITE_WIDTH;
 		if (x == level->levelWidth)
 		{
