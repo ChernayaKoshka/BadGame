@@ -3,13 +3,12 @@
 #include <time.h>
 #include <ShlObj.h>
 #include <process.h>
+#include "level.h"
 #include "math_custom.h"
 #include "globals.h"
 #include "drawing.h"
-#include "level.h"
-#include "misc.h"
+#include "entity.h"
 #include "player.h"
-#include "enemy.h"
 #include "screen.h"
 
 #define WINDOW_WIDTH 640
@@ -40,9 +39,10 @@ Player player = { 0 };
 
 WindowDetails* details;
 
+//#if DISPLAY_COLLISION_PROCESS
 TileInfo* dbgTile;
-
 POINT dbgTilePos;
+//#endif
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, WPARAM lParam)
 {
@@ -152,6 +152,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	strcpy_s(level->levelFile, sizeof(level->levelFile) - 1, "level.bin");
 	strcpy_s(level->tileFile, sizeof(level->tileFile) - 1, "tileinfo.bin");
+	strcpy_s(level->entityFile, sizeof(level->entityFile) - 1, "entityinfo.bin");
 
 	level->levelWidth = WINDOW_WIDTH;
 	level->levelHeight = WINDOW_HEIGHT;
@@ -178,10 +179,12 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	player.collisionPoints[3].x = SPRITE_WIDTH - 1;
 	player.collisionPoints[3].y = SPRITE_HEIGHT - 1;
 
+	//#if DISPLAY_COLLISION_PROCESS
 	dbgTile = calloc(1, sizeof(TileInfo));
 	dbgTile->bitmap = getBitMapData("debug_tile.bmp");
+	//#endif
 
-	setupEnemies(level);
+	setupEntities(level);
 
 	MSG msg;
 	unsigned long runCount = 0;
@@ -204,17 +207,28 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 			if (runCount % 100 == 0)
 			{
-				updateEnemies(level, 2);
+				updateEntities(level, 2);
 			}
 
 			updatePlayer(&player, level, runCount);
+
 			translate(level, details->BackBuffer, details->Width);
-			writeTile(details->BackBuffer, details->Width, player.pos.x, player.pos.y, playerSprite);
+
+			writeBitmap(details->BackBuffer, details->Width, player.pos.x, player.pos.y, playerSprite->bitmap);
+
 			for (int i = 0; i < 4; i++)
 				Plot(player.pos.x + player.collisionPoints[i].x, player.pos.y + player.collisionPoints[i].y, 0x00FFFFFF, details->BackBuffer, details->Width, details->Height);
-			displayEnemies(level, details->BackBuffer, details->Width);
 
-			writeTile(details->BackBuffer, details->Width, dbgTilePos.x, dbgTilePos.y, dbgTile);
+			displayEntities(level, details->BackBuffer, details->Width);
+
+			for (int i = 0; i < level->entityCount; i++)
+			{
+				POINT* colPoints = getEntityPoints(level, level->entities[i].entityId);
+				for (int j = 0; j < 4; j++)
+					Plot(colPoints[j].x, colPoints[j].y, 0x00FFFFFF, details->BackBuffer, details->Width, details->Height);
+				free(colPoints);
+			}
+
 			StretchDIBits(details->DC,
 				0, 0, details->Width, details->Height,
 				0, 0, details->BitMapInfo.bmiHeader.biWidth, Abs(details->BitMapInfo.bmiHeader.biHeight),
