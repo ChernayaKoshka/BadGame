@@ -124,56 +124,6 @@ int rectContainsPoint(POINT rect[4], POINT point)
 		return 0;
 }
 
-BOOL onSegment(POINT p, POINT q, POINT r)
-{
-	if (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) && q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y))
-		return TRUE;
-	return FALSE;
-}
-
-int findOrientation(POINT p, POINT q, POINT r)
-{
-	// See http://www.geeksforgeeks.org/orientation-3-ordered-points/
-	// for details of below formula.
-	int val = (q.y - p.y) * (r.x - q.x) -
-		(q.x - p.x) * (r.y - q.y);
-
-	if (val == 0) return 0;  // colinear
-
-	return (val > 0) ? 1 : 2; // clock or counterclock wise
-}
-
-// The main function that returns true if line segment 'p1q1'
-// and 'p2q2' intersect.
-BOOL doLinesIntersect(POINT p1, POINT q1, POINT p2, POINT q2)
-{
-	// Find the four orientations needed for general and
-	// special cases
-	int o1 = findOrientation(p1, q1, p2);
-	int o2 = findOrientation(p1, q1, q2);
-	int o3 = findOrientation(p2, q2, p1);
-	int o4 = findOrientation(p2, q2, q1);
-
-	// General case
-	if (o1 != o2 && o3 != o4)
-		return TRUE;
-
-	// Special Cases
-	// p1, q1 and p2 are colinear and p2 lies on segment p1q1
-	if (o1 == 0 && onSegment(p1, p2, q1)) return TRUE;
-
-	// p1, q1 and p2 are colinear and q2 lies on segment p1q1
-	if (o2 == 0 && onSegment(p1, q2, q1)) return TRUE;
-
-	// p2, q2 and p1 are colinear and p1 lies on segment p2q2
-	if (o3 == 0 && onSegment(p2, p1, q2)) return TRUE;
-
-	// p2, q2 and q1 are colinear and q1 lies on segment p2q2
-	if (o4 == 0 && onSegment(p2, q1, q2)) return TRUE;
-
-	return FALSE;
-}
-
 Slope getSlope(POINT p1, POINT p2)
 {
 	Slope slope = { 0 };

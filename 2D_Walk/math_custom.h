@@ -26,14 +26,10 @@ int GetColor(double* angle);
 int GetRandRGB();
 void specialPlot(int* screen, int screenWidth, int x, int y, int size, int color);
 
-POINT* convertRectToPoints(RECT rect);
+POINT* ToPoints(RECT rect);
 int rectContainsPoint(POINT rect[4], POINT point);
 Vector getVector(POINT p1, POINT p2);
 int dotProduct(Vector p1, Vector p2);
-
-//credit to http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
-BOOL doLinesIntersect(POINT p1, POINT q1, POINT p2, POINT q2);
-//end credit
 
 Slope getSlope(POINT p1, POINT p2);
 double getDistance(POINT p1, POINT p2);
