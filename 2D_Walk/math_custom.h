@@ -26,7 +26,6 @@ int GetColor(double* angle);
 int GetRandRGB();
 void specialPlot(int* screen, int screenWidth, int x, int y, int size, int color);
 
-POINT* ToPoints(RECT rect);
 int rectContainsPoint(POINT rect[4], POINT point);
 Vector getVector(POINT p1, POINT p2);
 int dotProduct(Vector p1, Vector p2);

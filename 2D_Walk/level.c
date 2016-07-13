@@ -201,7 +201,7 @@ TileInfo* getTileAtPos(Level* level, int y, int x)
 	return tile;
 }
 
-BOOL translate(Level* level, int* buffer, int bufferWidth)
+BOOL levelToScreen(Level* level, int* buffer, int bufferWidth)
 {
 	int x = 0;
 	int y = 0;

@@ -66,7 +66,7 @@ unsigned int* getBitMapData(char* path);
 
 BOOL loadTileData(Level* level);
 
-BOOL translate(Level* level, int* buffer, int bufferWidth);
+BOOL levelToScreen(Level* level, int* buffer, int bufferWidth);
 
 void writeBitmap(int* buffer, int bufferWidth, int x, int y, unsigned int* bitmap);
 

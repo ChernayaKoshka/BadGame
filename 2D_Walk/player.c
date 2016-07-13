@@ -77,8 +77,21 @@ void updatePlayer(Player* player, Level* level, unsigned long step)
 
 	if (step % 200 == 0)
 	{
-		changePos(player, level, player->pos.x, player->pos.y + 10);
+		changePos(player, level, player->pos.x, player->pos.y + GRAVITY);
 	}
+
+	if (step % 50 == 0)
+		switch (player->horizontalDirection)
+		{
+		case LEFT:
+			changePos(player, level, player->pos.x - PLAYER_HORIZONTAL_SPEED, player->pos.y);
+			break;
+		case RIGHT:
+			changePos(player, level, player->pos.x + PLAYER_HORIZONTAL_SPEED, player->pos.y);
+			break;
+		default:
+			break;
+		}
 
 	if (step % 300 == 0)
 	{

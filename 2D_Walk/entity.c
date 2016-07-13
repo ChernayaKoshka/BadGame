@@ -39,6 +39,14 @@ void displayEntities(Level* level, int* buffer, int bufferWidth)
 {
 	for (int i = 0; i < level->entityCount; i++)
 		writeBitmap(buffer, bufferWidth, level->entities[i].pos.x, level->entities[i].pos.y, level->entities[i].bitmap);
+
+	for (int i = 0; i < level->entityCount; i++)
+	{
+		POINT* colPoints = getEntityPoints(level, level->entities[i].entityId);
+		for (int j = 0; j < 4; j++)
+			Plot(colPoints[j].x, colPoints[j].y, 0x00FFFFFF, buffer, bufferWidth);
+		free(colPoints);
+	}
 }
 
 POINT* getEntityPoints(Level* level, char entityId)

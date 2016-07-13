@@ -1,21 +1,13 @@
 #include "math_custom.h"
 #include "drawing.h"
 
-void Plot(int x, int y, int color, int* buffer, int bufferWidth, int bufferHeight)
+void Plot(int x, int y, int color, int* buffer, int bufferWidth)
 {
-	if (x > bufferWidth) x = x - bufferWidth;
-	if (x < 0) return;
-
-	if (y > bufferHeight) y = y - bufferHeight;
-	if (y < 0) return;
-
-	if (((y*bufferWidth) + x) > (bufferWidth*bufferHeight)) return;
-
 	buffer[(y*bufferWidth) + x] = color;
 }
 
 //code credit of http://tech-algorithm.com/articles/drawing-line-using-bresenham-algorithm/
-void DrawLine(int x, int y, int x2, int y2, int color, int* buffer, int bufferWidth, int bufferHeight)
+void DrawLine(int x, int y, int x2, int y2, int color, int* buffer, int bufferWidth)
 {
 	//width
 	int w = x2 - x;
@@ -54,7 +46,7 @@ void DrawLine(int x, int y, int x2, int y2, int color, int* buffer, int bufferWi
 	for (int i = 0; i <= longest; i++)
 	{
 		//plot the point at x/y
-		Plot(x, y, color, buffer, bufferWidth, bufferHeight);
+		Plot(x, y, color, buffer, bufferWidth);
 		//increase the size of the numerator by our "shortest" (h/w, whichever is smaller)
 		numerator += shortest;
 
@@ -78,15 +70,15 @@ void DrawLine(int x, int y, int x2, int y2, int color, int* buffer, int bufferWi
 	}
 }
 
-void DrawRect(int x, int y, int width, int height, int color, int* buffer, int bufferWidth, int bufferHeight)
+void DrawRect(int x, int y, int width, int height, int color, int* buffer, int bufferWidth)
 {
 	for (int i = 0; i < height; i++)
 	{
-		DrawLine(x, (y + i), width, (y + i), color, buffer, bufferWidth, bufferHeight);
+		DrawLine(x, (y + i), width, (y + i), color, buffer, bufferWidth);
 	}
 }
 
-void DrawTriangle(TRIANGLE tri, int color, int* buffer, int bufferWidth, int bufferHeight)
+void DrawTriangle(TRIANGLE tri, int color, int* buffer, int bufferWidth)
 {
 	/*
 		1
@@ -101,14 +93,14 @@ void DrawTriangle(TRIANGLE tri, int color, int* buffer, int bufferWidth, int buf
 	*/
 
 	//2->1
-	DrawLine(tri.left.x, tri.left.y, tri.top.x, tri.top.y, color, buffer, bufferWidth, bufferHeight);
+	DrawLine(tri.left.x, tri.left.y, tri.top.x, tri.top.y, color, buffer, bufferWidth);
 	//2->3
-	DrawLine(tri.left.x, tri.left.y, tri.right.x, tri.right.y, color, buffer, bufferWidth, bufferHeight);
+	DrawLine(tri.left.x, tri.left.y, tri.right.x, tri.right.y, color, buffer, bufferWidth);
 	//3->1
-	DrawLine(tri.right.x, tri.right.y, tri.top.x, tri.top.y, color, buffer, bufferWidth, bufferHeight);
+	DrawLine(tri.right.x, tri.right.y, tri.top.x, tri.top.y, color, buffer, bufferWidth);
 }
 
-void DrawCircle(int x, int y, int radius, int color, int* buffer, int bufferWidth, int bufferHeight)
+void DrawCircle(int x, int y, int radius, int color, int* buffer, int bufferWidth)
 {
 	int x1 = radius;
 	int y1 = 0;
@@ -116,14 +108,14 @@ void DrawCircle(int x, int y, int radius, int color, int* buffer, int bufferWidt
 
 	while (y1 <= x1)
 	{
-		Plot(x1 + x, y1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 1
-		Plot(y1 + x, x1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 2
-		Plot(-x1 + x, y1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 4
-		Plot(-y1 + x, x1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 3
-		Plot(-x1 + x, -y1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 5
-		Plot(-y1 + x, -x1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 6
-		Plot(x1 + x, -y1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 7
-		Plot(y1 + x, -x1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 8
+		Plot(x1 + x, y1 + y, color, buffer, bufferWidth); // Octant 1
+		Plot(y1 + x, x1 + y, color, buffer, bufferWidth); // Octant 2
+		Plot(-x1 + x, y1 + y, color, buffer, bufferWidth); // Octant 4
+		Plot(-y1 + x, x1 + y, color, buffer, bufferWidth); // Octant 3
+		Plot(-x1 + x, -y1 + y, color, buffer, bufferWidth); // Octant 5
+		Plot(-y1 + x, -x1 + y, color, buffer, bufferWidth); // Octant 6
+		Plot(x1 + x, -y1 + y, color, buffer, bufferWidth); // Octant 7
+		Plot(y1 + x, -x1 + y, color, buffer, bufferWidth); // Octant 8
 		y1++;
 		if (decisionOver2 <= 0)
 		{
@@ -133,38 +125,6 @@ void DrawCircle(int x, int y, int radius, int color, int* buffer, int bufferWidt
 		{
 			x1--;
 			decisionOver2 += 2 * (y1 - x1) + 1;
-		}
-	}
-}
-
-//Funny story about this one, I accidentally wrote it by fucking up the Circle algo
-void DrawChevron(int x, int y, int radius, int color, int* buffer, int bufferWidth, int bufferHeight)
-{
-	int x1 = radius;
-	int y1 = 0;
-	int decisionOver2 = 1 - x1;
-
-	while (y1 <= x1)
-	{
-		Plot(x1 + x, y1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 1
-		Plot(y1 + x, x1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 2
-		Plot(-x1 + x, y1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 4
-		Plot(-y1 + x, x1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 3
-		Plot(-x1 + x, -y1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 5
-		Plot(-y1 + x, -x1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 6
-		Plot(x1 + x, -y1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 7
-		Plot(y1 + x, -x1 + y, color, buffer, bufferWidth, bufferHeight); // Octant 8
-
-		y1++;
-
-		if (decisionOver2 <= 0)
-		{
-			decisionOver2 += 2 * y + 1;
-		}
-		else
-		{
-			x--;
-			decisionOver2 += 2 * (y - x) + 1;
 		}
 	}
 }

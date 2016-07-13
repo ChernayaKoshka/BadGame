@@ -158,6 +158,7 @@
     <ClCompile Include="main.c" />
     <ClCompile Include="math_custom.c" />
     <ClCompile Include="player.c" />
+    <ClCompile Include="screen.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug_custom.h" />

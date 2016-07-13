@@ -40,6 +40,9 @@
     <ClCompile Include="entity.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="screen.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math_custom.h">

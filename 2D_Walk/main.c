@@ -16,7 +16,6 @@
 
 #define WINDOW_TITLE L"2D Walk"
 #define WINDOW_CLASS L"2dwalk"
-#define GRAVITY 1
 
 wchar_t* titleFormat = L"(%d,%d)";
 wchar_t title[256] = L"(%d,%d)";
@@ -26,18 +25,10 @@ wchar_t dbg[256];
 
 BOOL running = TRUE;
 
-unsigned long int generation = 0;
-
-int ButtonMessage = 0;
-
-int paused = 0;
-
-HBRUSH hbrWhite, hbrGray;
-
 Level* level;
 Player player = { 0 };
 
-WindowDetails* details;
+extern WindowDetails* details;
 
 //#if DISPLAY_COLLISION_PROCESS
 TileInfo* dbgTile;
@@ -62,10 +53,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, WPARAM lParam)
 		switch (wParam)
 		{
 		case VK_LEFT:
-			changePos(&player, level, player.pos.x - 5, player.pos.y);
+			player.horizontalDirection = LEFT;
 			break;
 		case VK_RIGHT:
-			changePos(&player, level, player.pos.x + 5, player.pos.y);
+			player.horizontalDirection = RIGHT;
 			break;
 		case VK_SPACE:
 			if (!player.isJumping && getTileUnderPlayer(&player, level)->is_collidable)
@@ -77,70 +68,64 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, WPARAM lParam)
 			break;
 		}
 		break;
+	case WM_KEYUP:
+		switch (wParam)
+		{
+		case VK_LEFT:
+			player.horizontalDirection = NONE;
+			break;
+		case VK_RIGHT:
+			player.horizontalDirection = NONE;
+			break;
+		}
+
 	default:
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 	return Result;
 }
 
-WindowDetails* DefineWindow(HINSTANCE hInstance, int width, int height, wchar_t* className, wchar_t* windowName, int nShowCmd)
+void update(int runCount)
 {
-	WindowDetails* details = calloc(1, sizeof(WindowDetails));
-	details->Height = height;
-	details->Width = width;
+	if (runCount % 100 == 0)
+		updateEntities(level, 2);
+	updatePlayer(&player, level, runCount);
+}
 
-	int bufferSize = height*width * sizeof(int);
-	details->BackBuffer = calloc(1, bufferSize); //4 = bytes to display RGB
+void render()
+{
+	swprintf_s(title, 256, titleFormat, player.pos.x, player.pos.y);
+	SetWindowTextW(details->Window, title);
 
-	details->BitMapInfo.bmiHeader.biSize = sizeof(details->BitMapInfo.bmiHeader);
-	details->BitMapInfo.bmiHeader.biWidth = details->Width;
-	details->BitMapInfo.bmiHeader.biHeight = -details->Height;
-	details->BitMapInfo.bmiHeader.biPlanes = 1;
-	details->BitMapInfo.bmiHeader.biBitCount = 32;
-	details->BitMapInfo.bmiHeader.biCompression = BI_RGB;
+	levelToScreen(level, details->BackBuffer, details->Width);
 
-	//define window
-	WNDCLASSEX wc = { 0 };
-	wc.cbSize = sizeof(wc);
-#pragma warning(disable : 4028)
-	wc.lpfnWndProc = WndProc;
-	wc.hInstance = hInstance;
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	writeBitmap(details->BackBuffer, details->Width, player.pos.x, player.pos.y, player.bitmap);
 
-	wc.lpszClassName = className;
+	displayEntities(level, details->BackBuffer, details->Width);
 
-	if (!RegisterClassEx(&wc))
-		return NULL;
+#if DISPLAY_COLLISION_POINTS
+	for (int i = 0; i < 4; i++)
+		Plot(player.pos.x + player.collisionPoints[i].x, player.pos.y + player.collisionPoints[i].y, 0x00FFFFFF, details->BackBuffer, details->Width);
 
-	RECT adjustedRect = { 0 };
-	adjustedRect.bottom = height;
-	adjustedRect.right = width;
-	AdjustWindowRect(&adjustedRect, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE, FALSE);
+	for (int i = 0; i < level->entityCount; i++)
+	{
+		POINT* colPoints = getEntityPoints(level, level->entities[i].entityId);
+		for (int j = 0; j < 4; j++)
+			Plot(colPoints[j].x, colPoints[j].y, 0x00FFFFFF, details->BackBuffer, details->Width);
+		free(colPoints);
+	}
+#endif
 
-	HWND hwndWindow = CreateWindowExW(
-		0,
-		className,
-		windowName,
-		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		Difference(adjustedRect.left, adjustedRect.right),
-		Difference(adjustedRect.bottom, adjustedRect.top),
-		NULL,
-		NULL,
-		0,
-		0);
-
-	details->Window = hwndWindow;
-	details->DC = GetDC(hwndWindow);
-	ShowWindow(hwndWindow, nShowCmd);
-
-	return details;
+	StretchDIBits(details->DC,
+		0, 0, details->Width, details->Height,
+		0, 0, details->BitMapInfo.bmiHeader.biWidth, Abs(details->BitMapInfo.bmiHeader.biHeight),
+		details->BackBuffer, &details->BitMapInfo,
+		DIB_RGB_COLORS, SRCCOPY);
 }
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
-	details = DefineWindow(hInstance, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_CLASS, WINDOW_TITLE, nShowCmd);
+	setupWindow(hInstance, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_CLASS, WINDOW_TITLE, nShowCmd, WndProc);
 
 	clock_t prevTime = clock();
 
@@ -159,10 +144,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	loadLevel(level);
 
-	TileInfo* playerSprite = calloc(1, sizeof(TileInfo));
-	strcpy_s(playerSprite->spritePath, sizeof(playerSprite->spritePath) - 1, "player.bmp");
-
-	playerSprite->bitmap = getBitMapData(playerSprite->spritePath);
+	player.bitmap = getBitMapData("player.bmp");
 
 	player.pos.x = 0;
 	player.pos.y = 200;
@@ -200,40 +182,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		double timePassed = (double)(curTime - prevTime) / CLOCKS_PER_SEC;
 		if (timePassed >= STEPS_PER_SECOND)
 		{
-			swprintf_s(title, 256, titleFormat, player.pos.x, player.pos.y);
-			SetWindowTextW(details->Window, title);
-
-			runCount++;
-
-			if (runCount % 100 == 0)
-			{
-				updateEntities(level, 2);
-			}
-
-			updatePlayer(&player, level, runCount);
-
-			translate(level, details->BackBuffer, details->Width);
-
-			writeBitmap(details->BackBuffer, details->Width, player.pos.x, player.pos.y, playerSprite->bitmap);
-
-			for (int i = 0; i < 4; i++)
-				Plot(player.pos.x + player.collisionPoints[i].x, player.pos.y + player.collisionPoints[i].y, 0x00FFFFFF, details->BackBuffer, details->Width, details->Height);
-
-			displayEntities(level, details->BackBuffer, details->Width);
-
-			for (int i = 0; i < level->entityCount; i++)
-			{
-				POINT* colPoints = getEntityPoints(level, level->entities[i].entityId);
-				for (int j = 0; j < 4; j++)
-					Plot(colPoints[j].x, colPoints[j].y, 0x00FFFFFF, details->BackBuffer, details->Width, details->Height);
-				free(colPoints);
-			}
-
-			StretchDIBits(details->DC,
-				0, 0, details->Width, details->Height,
-				0, 0, details->BitMapInfo.bmiHeader.biWidth, Abs(details->BitMapInfo.bmiHeader.biHeight),
-				details->BackBuffer, &details->BitMapInfo,
-				DIB_RGB_COLORS, SRCCOPY);
+			update(runCount++);
+			render();
 		}
 	}
 

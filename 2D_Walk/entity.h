@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include "level.h"
 #include "math_custom.h"
+#include "drawing.h"
 
 void setupEntities(Level* level);
 void updateEntities(Level* level, int speedMultiplier);
