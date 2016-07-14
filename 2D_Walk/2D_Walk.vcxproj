@@ -151,23 +151,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bitmap.c" />
     <ClCompile Include="debug_custom.c" />
     <ClCompile Include="drawing.c" />
     <ClCompile Include="entity.c" />
+    <ClCompile Include="file.c" />
     <ClCompile Include="level.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="math_custom.c" />
     <ClCompile Include="player.c" />
     <ClCompile Include="screen.c" />
+    <ClCompile Include="timer.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bitmap.h" />
     <ClInclude Include="debug_custom.h" />
     <ClInclude Include="drawing.h" />
     <ClInclude Include="entity.h" />
+    <ClInclude Include="file.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="level.h" />
     <ClInclude Include="math_custom.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="timer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="level.bin">
