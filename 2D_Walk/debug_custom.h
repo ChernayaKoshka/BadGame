@@ -1,7 +1,8 @@
 #pragma once
 
-#include <time.h>
 #include <stdio.h>
 #include <Windows.h>
+#include "entity.h"
+#include "level.h"
 
-void dbgPrint(clock_t time, wchar_t* functionName);
+BOOL Debug_WriteTestData();
