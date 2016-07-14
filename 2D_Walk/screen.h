@@ -16,8 +16,6 @@ typedef struct tagWindowDetails
 
 extern WindowDetails* details;
 
-WindowDetails* DefineWindow(HINSTANCE hInstance, int width, int height, wchar_t* className, wchar_t* windowName, int nShowCmd, WNDPROC proc);
+BOOL Screen_Init(HINSTANCE hInstance, int width, int height, wchar_t* className, wchar_t* windowName, int nShowCmd);
 
-void setupWindow(HINSTANCE hInstance, int width, int height, wchar_t* className, wchar_t* windowName, int nShowCmd, WNDPROC proc);
-
-void updateWindow();
+void Screen_Render();
