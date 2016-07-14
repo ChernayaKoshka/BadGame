@@ -7,6 +7,8 @@
 #include <assert.h>
 #include "math_custom.h"
 #include "debug_custom.h"
+#include "file.h"
+#include "bitmap.h"
 
 #define SPRITE_HEIGHT 20
 #define SPRITE_WIDTH 20
@@ -31,7 +33,7 @@ typedef struct tagEntity
 	char spritePath[256];
 	unsigned int* bitmap;
 
-	POINT pos;
+	FloatPoint pos;
 	POINT movementData1;
 	POINT movementData2;
 	BOOL movingLeft;
@@ -58,20 +60,14 @@ typedef struct tagLevel
 	EntityInfo* entities;
 }Level;
 
-BOOL loadLevel(Level* level);
+BOOL Level_Init(Level* level);
 
-TileInfo* findTile(Level* level, char id);
+TileInfo* Level_FindTile(Level* level, char id);
 
-unsigned int* getBitMapData(char* path);
+unsigned int* Bitmap_GetBytes(char* path);
 
-BOOL loadTileData(Level* level);
+BOOL Level_LoadTileData(Level* level);
 
-BOOL levelToScreen(Level* level, int* buffer, int bufferWidth);
+BOOL Level_WriteToBuffer(Level* level, int* buffer, int bufferWidth);
 
-void writeBitmap(int* buffer, int bufferWidth, int x, int y, unsigned int* bitmap);
-
-TileInfo* getTileAtPos(Level* level, int y, int x);
-
-#if _DEBUG
-void writeTestData();
-#endif
+TileInfo* Level_GetTileAtPos(Level* level, int y, int x);
