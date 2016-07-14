@@ -4,8 +4,12 @@
 #include "level.h"
 #include "math_custom.h"
 #include "drawing.h"
+#include "screen.h"
+#include "file.h"
 
-void setupEntities(Level* level);
-void updateEntities(Level* level, int speedMultiplier);
-void displayEntities(Level* level, int* buffer, int bufferWidth);
-POINT* getEntityPoints(Level* level, char entityId);
+#define DEFAULT_ENTITY_SPEED 1.0f/60.0f
+
+BOOL Entities_Init();
+void Enitites_Update();
+void Enities_WriteToBuffer();
+POINT* Entities_GetEntityPoints(char entityId);
