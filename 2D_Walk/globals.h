@@ -1,9 +1,9 @@
 #pragma once
 
-#define STEPS_PER_SECOND 0.10
+#define STEPS_PER_SECOND 1.0f/60.0f
 
 #define DISPLAY_COLLISION_PROCESS 0
 
 #define DISPLAY_COLLISION_POINTS 1
 
-#define GRAVITY 20
+#define GRAVITY 20 / 60.0f / 4
