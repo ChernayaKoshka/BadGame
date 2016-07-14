@@ -2,15 +2,13 @@
 
 #include <Windows.h>
 #include "math_custom.h"
-#include "level.h"
 #include "globals.h"
-#include "screen.h"
-#include "entity.h"
-#include "drawing.h"
+#include "level.h"
+#include <math.h>
 
 #define PLAYER_JUMP_HEIGHT SPRITE_HEIGHT*3
 
-#define PLAYER_HORIZONTAL_SPEED 4
+#define PLAYER_HORIZONTAL_SPEED 4 / 60.0f
 
 typedef struct tagPlayerPos
 {
@@ -29,8 +27,8 @@ typedef enum tagPlayerDirection
 
 typedef struct tagPlayer
 {
-	POINT pos;
-	POINT collisionPoints[4];
+	FloatPoint pos;
+	FloatPoint collisionPoints[4];
 
 	ePlayerDirection horizontalDirection;
 	ePlayerDirection verticalDirection;
@@ -41,8 +39,14 @@ typedef struct tagPlayer
 	unsigned int* bitmap;
 }Player;
 
-BOOL changePos(Player* player, Level* level, int newX, int newY);
+extern Player* player;
 
-TileInfo* getTileUnderPlayer(Player* player, Level* level);
+BOOL Player_Init();
 
-void updatePlayer(Player* player, Level* level, unsigned long step);
+void Player_Die();
+
+BOOL Player_ChangePos(float relativeX, float relativeY);
+
+void Player_Update();
+
+void Player_Jump();
