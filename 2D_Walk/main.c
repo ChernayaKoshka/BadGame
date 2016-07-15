@@ -20,17 +20,7 @@ Level* level;
 
 BOOL running = TRUE;
 
-void HandleWindowEvents()
-{
-	MSG msg;
-	while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-}
-
-void update()
+void update(float timeAccumulated)
 {
 	Enitites_Update();
 	Player_Update();
@@ -41,7 +31,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	/*INIT*/
 	if (!Time_Init())
 	{
-		MessageBoxW(NULL, L"Get a newer operating system, jesus.", L"What is this, the stone age?", MB_OK);
+		MessageBoxW(NULL, L"Get a newer operating system.", L"What is this, the stone age?", MB_OK);
 		return -1;
 	}
 
@@ -82,10 +72,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	float prevTime = 0;
 	float timeAccumulated = 0;
 
-	unsigned long runCount = 0;
 	while (running)
 	{
-		HandleWindowEvents();
+		Screen_HandleWindowEvents();
 		float time = Time_Get();
 		timeAccumulated += time - prevTime;
 		prevTime = time;
@@ -93,6 +82,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		{
 			update(timeAccumulated);
 			Screen_Render();
+			timeAccumulated -= STEPS_PER_SECOND;
 		}
 	}
 

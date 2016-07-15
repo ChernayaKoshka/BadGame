@@ -6,4 +6,4 @@
 
 #define DISPLAY_COLLISION_POINTS 1
 
-#define GRAVITY 20 / 60.0f / 4
+#define GRAVITY 1.0f/120.0f

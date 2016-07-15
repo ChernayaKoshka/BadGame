@@ -69,19 +69,6 @@ void specialPlot(int* screen, int screenWidth, int x, int y, int size, int color
 	}
 }
 
-Vector getVector(POINT p1, POINT p2)
-{
-	Vector toReturn = { 0 };
-	toReturn.i = p2.x - p1.x;
-	toReturn.j = p2.y - p1.y;
-	return toReturn;
-}
-
-int dotProduct(Vector p1, Vector p2)
-{
-	return ((p1.i*p2.i) + (p1.j*p2.j));
-}
-
 POINT* convertRectToPoints(RECT rect)
 {
 	POINT* points = malloc(4 * sizeof(POINT));
@@ -102,26 +89,6 @@ POINT* convertRectToPoints(RECT rect)
 	points[1].y = Least(rect.top, rect.bottom);
 
 	return points;
-}
-
-//uses vectors for fancy stuff :)
-//formula: (0<AM[dot]AB<AB[dot]AB)/\(0<AM[dot]AD<AD[dot]AD) where M is a point an A,B,D are top left, top right, and bottom right respectively. [dot] represents the dot as in dot product.
-int rectContainsPoint(POINT rect[4], POINT point)
-{
-	Vector AM = getVector(rect[0], point);
-	Vector AB = getVector(rect[0], rect[1]);
-	Vector BC = getVector(rect[1], rect[2]);
-	Vector BM = getVector(rect[1], point);
-
-	int dotAMAB = dotProduct(AM, AB);
-	int dotABAB = dotProduct(AB, AB);
-	int dotBCBM = dotProduct(BC, BM);
-	int dotBCBC = dotProduct(BC, BC);
-
-	if (((0 <= dotAMAB) && (dotAMAB <= dotABAB)) && ((0 <= dotBCBM) && (dotBCBM <= dotBCBC)))
-		return 1;
-	else
-		return 0;
 }
 
 Slope getSlope(POINT p1, POINT p2)

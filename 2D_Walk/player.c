@@ -2,6 +2,10 @@
 
 extern Level* level;
 
+#if DISPLAY_COLLISION_PROCESS
+extern WindowDetails* details;
+#endif
+
 Player* player;
 
 BOOL Player_Init()
@@ -34,7 +38,7 @@ void Player_Die()
 	player->pos.y = 200;
 }
 
-BOOL Player_ChangePos(float relativeX, float relativeY)
+BOOL Player_AdjustPos(float relativeX, float relativeY)
 {
 	FloatPoint newPos = { 0 };
 	newPos.x = relativeX + player->pos.x;
@@ -43,6 +47,9 @@ BOOL Player_ChangePos(float relativeX, float relativeY)
 	POINT integerPos = { 0 };
 	integerPos.x = (int)roundf(player->pos.x + relativeX);
 	integerPos.y = (int)roundf(player->pos.y + relativeY);
+
+	if (integerPos.y > level->levelHeight - SPRITE_HEIGHT)
+		return TRUE;
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -53,7 +60,7 @@ BOOL Player_ChangePos(float relativeX, float relativeY)
 		for (int j = 0; j < level->entityCount; j++)
 		{
 			POINT* entityPoints = Entities_GetEntityPoints(level->entities[j].entityId);
-			if (!rectContainsPoint(entityPoints, integerPos))
+			if (!Vector_RectContainsPoints(entityPoints, integerPos))
 			{
 				free(entityPoints);
 				continue;
@@ -70,6 +77,16 @@ BOOL Player_ChangePos(float relativeX, float relativeY)
 		int adjustedY = roundUpTo(integerPos.y - colPoint.y, SPRITE_HEIGHT);
 		int adjustedX = roundUpTo(integerPos.x - colPoint.x, SPRITE_WIDTH);
 
+#if DISPLAY_COLLISION_PROCESS
+		Bitmap_WriteToBuffer(details->BackBuffer, details->Width, 20, 20, adjustedX, adjustedY, calloc(20 * 20, sizeof(int)));
+		StretchDIBits(details->DC,
+			0, 0, details->Width, details->Height,
+			0, 0, details->BitMapInfo.bmiHeader.biWidth, Abs(details->BitMapInfo.bmiHeader.biHeight),
+			details->BackBuffer, &details->BitMapInfo,
+			DIB_RGB_COLORS, SRCCOPY);
+		Sleep(50);
+#endif
+
 		TileInfo* info = Level_GetTileAtPos(level, adjustedY, adjustedX);
 		if (info->is_collidable)
 			return TRUE;
@@ -81,28 +98,25 @@ BOOL Player_ChangePos(float relativeX, float relativeY)
 
 TileInfo* Player_GetTileUnderPlayer()
 {
-	return Level_GetTileAtPos(level, player->pos.y + SPRITE_HEIGHT, player->pos.x);
+	int adjustedY = roundDownTo(player->pos.y, SPRITE_HEIGHT);
+	int adjustedX = roundDownTo(player->pos.x, SPRITE_WIDTH);
+	return Level_GetTileAtPos(level, adjustedY + SPRITE_HEIGHT, adjustedX);
 }
 
 void Player_Update()
 {
+	player->velocity.j += GRAVITY;
 	TileInfo* tile = Player_GetTileUnderPlayer(player, level);
+	if (tile->is_collidable && !player->isJumping)
+		player->velocity.j = 0;
 
-	Player_ChangePos(0, GRAVITY);
-
-	switch (player->horizontalDirection)
+	if (Player_AdjustPos(0, player->velocity.j))
 	{
-	case LEFT:
-		Player_ChangePos(-PLAYER_HORIZONTAL_SPEED, 0);
-		break;
-	case RIGHT:
-		Player_ChangePos(PLAYER_HORIZONTAL_SPEED, 0);
-		break;
-	default:
-		break;
+		player->velocity.j = 0;
+		player->isJumping = FALSE;
 	}
 
-	player->isJumping = FALSE;
+	Player_AdjustPos(player->velocity.i, 0);
 
 	if (tile->is_dangerous)
 	{
@@ -111,12 +125,17 @@ void Player_Update()
 	}
 }
 
-void Player_Jump()
+void Player_StartJump()
 {
 	if (!player->isJumping && Player_GetTileUnderPlayer(player, level)->is_collidable)
 	{
-		player->jumpHeight = PLAYER_JUMP_HEIGHT;
-		Player_ChangePos(0, -PLAYER_JUMP_HEIGHT);
+		player->velocity.j = -PLAYER_JUMP_VELOCITY;
 		player->isJumping = TRUE;
 	}
+}
+
+void Player_EndJump()
+{
+	if (player->velocity.j < -PLAYER_JUMP_VELOCITY / 2)
+		player->velocity.j = -PLAYER_JUMP_VELOCITY / 2;
 }

@@ -1,14 +1,21 @@
 #pragma once
 
 #include <Windows.h>
+#include <math.h>
 #include "math_custom.h"
 #include "globals.h"
 #include "level.h"
-#include <math.h>
+#include "vector.h"
 
-#define PLAYER_JUMP_HEIGHT SPRITE_HEIGHT*3
+#if DISPLAY_COLLISION_PROCESS
+#include "screen.h"
+#endif
 
-#define PLAYER_HORIZONTAL_SPEED 4 / 60.0f
+#define PLAYER_JUMP_VELOCITY 60.0/60.0f
+
+#define PLAYER_HORIZONTAL_SPEED_MAX 60.0 / 60.0f
+
+#define PLAYER_HORIZONTAL_SPEED_INCREMENT PLAYER_HORIZONTAL_SPEED_MAX / 4
 
 typedef struct tagPlayerPos
 {
@@ -16,22 +23,12 @@ typedef struct tagPlayerPos
 	float y;
 }PlayerPos;
 
-typedef enum tagPlayerDirection
-{
-	NONE = 0,
-	LEFT,
-	UP,
-	RIGHT,
-	DOWN
-}ePlayerDirection;
-
 typedef struct tagPlayer
 {
 	FloatPoint pos;
 	FloatPoint collisionPoints[4];
 
-	ePlayerDirection horizontalDirection;
-	ePlayerDirection verticalDirection;
+	Vector velocity;
 
 	int jumpHeight;
 	unsigned int isJumping : 1;
@@ -45,8 +42,10 @@ BOOL Player_Init();
 
 void Player_Die();
 
-BOOL Player_ChangePos(float relativeX, float relativeY);
+BOOL Player_AdjustPos(float relativeX, float relativeY);
 
 void Player_Update();
 
-void Player_Jump();
+void Player_StartJump();
+
+void Player_EndJump();

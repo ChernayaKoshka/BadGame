@@ -6,8 +6,18 @@ WindowDetails* details;
 extern Player* player;
 extern Level* level;
 
-wchar_t* titleFormat = L"(%f,%f)";
+wchar_t* titleFormat = L"Pos: (%f,%f) Velocity Vector: <%f,%f>";
 wchar_t title[256];
+
+void Screen_HandleWindowEvents()
+{
+	MSG msg;
+	while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, WPARAM lParam)
 {
@@ -27,13 +37,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, WPARAM lParam)
 		switch (wParam)
 		{
 		case VK_LEFT:
-			player->horizontalDirection = LEFT;
+			if (player->velocity.i > -PLAYER_HORIZONTAL_SPEED_MAX)
+				player->velocity.i -= PLAYER_HORIZONTAL_SPEED_INCREMENT;
 			break;
 		case VK_RIGHT:
-			player->horizontalDirection = RIGHT;
+			if (player->velocity.i < PLAYER_HORIZONTAL_SPEED_MAX)
+				player->velocity.i += PLAYER_HORIZONTAL_SPEED_INCREMENT;
 			break;
 		case VK_SPACE:
-			Player_Jump();
+			Player_StartJump();
 			break;
 		}
 		break;
@@ -41,10 +53,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, WPARAM lParam)
 		switch (wParam)
 		{
 		case VK_LEFT:
-			player->horizontalDirection = NONE;
+			player->velocity.i = 0;
 			break;
 		case VK_RIGHT:
-			player->horizontalDirection = NONE;
+			player->velocity.i = 0;
+			break;
+		case VK_SPACE:
+			Player_EndJump();
 			break;
 		}
 
@@ -122,7 +137,7 @@ BOOL Screen_Init(HINSTANCE hInstance, int width, int height, wchar_t* className,
 
 void Screen_Render()
 {
-	swprintf_s(title, 256, titleFormat, player->pos.x, player->pos.y);
+	swprintf_s(title, 256, titleFormat, player->pos.x, player->pos.y, player->velocity.i, player->velocity.j);
 	SetWindowTextW(details->Window, title);
 
 	Level_WriteToBuffer(level, details->BackBuffer, details->Width);

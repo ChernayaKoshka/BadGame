@@ -5,12 +5,6 @@
 
 #define M_PI 3.141592653589793238462643383279502884197169399375105820974
 
-typedef struct tagVector
-{
-	int i;
-	int j;
-}Vector;
-
 typedef struct tagSlope
 {
 	int dx;
@@ -31,10 +25,6 @@ double getRandomFloatInRange(double min, double max);
 int GetColor(double* angle);
 int GetRandRGB();
 void specialPlot(int* screen, int screenWidth, int x, int y, int size, int color);
-
-int rectContainsPoint(POINT rect[4], POINT point);
-Vector getVector(POINT p1, POINT p2);
-int dotProduct(Vector p1, Vector p2);
 
 Slope getSlope(POINT p1, POINT p2);
 double getDistance(POINT p1, POINT p2);

@@ -162,6 +162,7 @@
     <ClCompile Include="player.c" />
     <ClCompile Include="screen.c" />
     <ClCompile Include="timer.c" />
+    <ClCompile Include="vector.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bitmap.h" />
@@ -174,6 +175,7 @@
     <ClInclude Include="math_custom.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="timer.h" />
+    <ClInclude Include="vector.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="level.bin">

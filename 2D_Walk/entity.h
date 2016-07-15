@@ -7,7 +7,7 @@
 #include "screen.h"
 #include "file.h"
 
-#define DEFAULT_ENTITY_SPEED 1.0f/60.0f
+#define DEFAULT_ENTITY_SPEED 60.0f/60.0f
 
 BOOL Entities_Init();
 void Enitites_Update();
