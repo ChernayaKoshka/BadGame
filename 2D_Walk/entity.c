@@ -71,7 +71,7 @@ void Enities_WriteToBuffer()
 
 	for (int i = 0; i < level->entityCount; i++)
 	{
-		POINT* colPoints = Entities_GetEntityPoints(level->entities[i].entityId);
+		FloatPoint* colPoints = Entities_GetEntityPoints(level->entities[i].entityId);
 		for (int j = 0; j < 4; j++)
 			Plot(colPoints[j].x, colPoints[j].y, 0x00FFFFFF, details->BackBuffer, details->Width);
 		free(colPoints);
@@ -88,9 +88,9 @@ EntityInfo* Entities_Locate(char entityId)
 	return NULL;
 }
 
-POINT* Entities_GetEntityPoints(char entityId)
+FloatPoint* Entities_GetEntityPoints(char entityId)
 {
-	POINT* points = calloc(4, sizeof(POINT));
+	FloatPoint* points = calloc(4, sizeof(POINT));
 
 	EntityInfo* entity = Entities_Locate(entityId);
 
@@ -99,11 +99,11 @@ POINT* Entities_GetEntityPoints(char entityId)
 	points[0].x = entity->pos.x + 0;
 	points[0].y = entity->pos.y + 0;
 
-	points[1].x = entity->pos.x + 0;
-	points[1].y = entity->pos.y + SPRITE_HEIGHT - 1;
+	points[1].x = entity->pos.x + SPRITE_WIDTH - 1;
+	points[1].y = entity->pos.y + 0;
 
-	points[2].x = entity->pos.x + SPRITE_WIDTH - 1;
-	points[2].y = entity->pos.y + 0;
+	points[2].x = entity->pos.x + 0;
+	points[2].y = entity->pos.y + SPRITE_HEIGHT - 1;
 
 	points[3].x = entity->pos.x + SPRITE_WIDTH - 1;
 	points[3].y = entity->pos.y + SPRITE_HEIGHT - 1;

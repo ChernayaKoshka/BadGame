@@ -15,16 +15,16 @@ BOOL Player_Init()
 
 	player->bitmap = Bitmap_GetBytes("player.bmp");
 	player->pos.x = 0;
-	player->pos.y = 200;
+	player->pos.y = 295;
 
 	player->collisionPoints[0].x = 0;
 	player->collisionPoints[0].y = 0;
 
-	player->collisionPoints[1].x = 0;
-	player->collisionPoints[1].y = SPRITE_HEIGHT - 1;
+	player->collisionPoints[1].x = SPRITE_WIDTH - 1;
+	player->collisionPoints[1].y = 0;
 
-	player->collisionPoints[2].x = SPRITE_WIDTH - 1;
-	player->collisionPoints[2].y = 0;
+	player->collisionPoints[2].x = 0;
+	player->collisionPoints[2].y = SPRITE_HEIGHT - 1;
 
 	player->collisionPoints[3].x = SPRITE_WIDTH - 1;
 	player->collisionPoints[3].y = SPRITE_HEIGHT - 1;
@@ -34,8 +34,77 @@ BOOL Player_Init()
 
 void Player_Die()
 {
+	player->velocity.i = 0;
+	player->velocity.j = 0;
 	player->pos.x = 0;
-	player->pos.y = 200;
+	player->pos.y = 295;
+}
+
+void Player_CheckEntityCollisions(FloatPoint integerPos)
+{
+	for (int i = 0; i < level->entityCount; i++)
+	{
+		FloatPoint* entityPoints = Entities_GetEntityPoints(level->entities[i].entityId);
+		if (!Vector_RectContainsPoints(entityPoints, integerPos))
+		{
+			free(entityPoints);
+			continue;
+		}
+		if (level->entities[i].is_dangerous)
+		{
+			free(entityPoints);
+			Player_Die(player);
+			continue;
+		}
+		free(entityPoints);
+	}
+}
+
+void Player_CheckColissions()
+{
+	POINT integerPos = { 0 };
+	integerPos.x = (int)roundf(player->pos.x);
+	integerPos.y = (int)roundf(player->pos.y);
+
+	int bottomTouchCount = 0;
+	for (int i = 0; i < 2; i++) //top
+	{
+		FloatPoint colPoint = player->collisionPoints[i];
+		if (colPoint.y + integerPos.y >= level->levelHeight || colPoint.y + integerPos.y < 0 || integerPos.x  > level->levelWidth - SPRITE_WIDTH || integerPos.x < 0)
+			return;
+
+		int adjustedY = roundUpTo(integerPos.y + colPoint.y + 1, SPRITE_HEIGHT);
+		int adjustedX = roundUpTo(integerPos.x - colPoint.x, SPRITE_WIDTH);
+
+		TileInfo* tile = Level_GetTileAtPos(level, adjustedY, adjustedX);
+
+		bottomTouchCount += tile->is_collidable;
+	}
+
+	/*for (int i = 2; i < 4; i++) //bottom
+	{
+	FloatPoint colPoint = player->collisionPoints[i];
+	if (colPoint.y + integerPos.y >= level->levelHeight || colPoint.y + integerPos.y < 0 || integerPos.x  > level->levelWidth - SPRITE_WIDTH || integerPos.x < 0)
+	return TRUE;
+
+	int adjustedY = roundUpTo(integerPos.y + colPoint.y + 1, SPRITE_HEIGHT);
+	int adjustedX = roundUpTo(integerPos.x - colPoint.x, SPRITE_WIDTH);
+
+	#if DISPLAY_COLLISION_PROCESS
+	Bitmap_WriteToBuffer(details->BackBuffer, details->Width, 20, 20, adjustedX, adjustedY, calloc(20 * 20, sizeof(int)));
+	StretchDIBits(details->DC,
+	0, 0, details->Width, details->Height,
+	0, 0, details->BitMapInfo.bmiHeader.biWidth, Abs(details->BitMapInfo.bmiHeader.biHeight),
+	details->BackBuffer, &details->BitMapInfo,
+	DIB_RGB_COLORS, SRCCOPY);
+	Sleep(10);
+	#endif
+	}*/
+
+	if (bottomTouchCount > 0)
+		player->isOnGround = 1;
+	else
+		player->isOnGround = 0;
 }
 
 BOOL Player_AdjustPos(float relativeX, float relativeY)
@@ -44,9 +113,9 @@ BOOL Player_AdjustPos(float relativeX, float relativeY)
 	newPos.x = relativeX + player->pos.x;
 	newPos.y = relativeY + player->pos.y;
 
-	POINT integerPos = { 0 };
-	integerPos.x = (int)roundf(player->pos.x + relativeX);
-	integerPos.y = (int)roundf(player->pos.y + relativeY);
+	FloatPoint integerPos = { 0 };
+	integerPos.x = roundf(player->pos.x + relativeX);
+	integerPos.y = roundf(player->pos.y + relativeY);
 
 	if (integerPos.y > level->levelHeight - SPRITE_HEIGHT)
 		return TRUE;
@@ -59,7 +128,7 @@ BOOL Player_AdjustPos(float relativeX, float relativeY)
 
 		for (int j = 0; j < level->entityCount; j++)
 		{
-			POINT* entityPoints = Entities_GetEntityPoints(level->entities[j].entityId);
+			FloatPoint* entityPoints = Entities_GetEntityPoints(level->entities[j].entityId);
 			if (!Vector_RectContainsPoints(entityPoints, integerPos))
 			{
 				free(entityPoints);
@@ -106,8 +175,10 @@ TileInfo* Player_GetTileUnderPlayer()
 void Player_Update()
 {
 	player->velocity.j += GRAVITY;
-	TileInfo* tile = Player_GetTileUnderPlayer(player, level);
-	if (tile->is_collidable && !player->isJumping)
+
+	Player_CheckColissions();
+
+	if (player->isOnGround && !player->isJumping)
 		player->velocity.j = 0;
 
 	if (Player_AdjustPos(0, player->velocity.j))
@@ -117,17 +188,11 @@ void Player_Update()
 	}
 
 	Player_AdjustPos(player->velocity.i, 0);
-
-	if (tile->is_dangerous)
-	{
-		Player_Die();
-		return;
-	}
 }
 
 void Player_StartJump()
 {
-	if (!player->isJumping && Player_GetTileUnderPlayer(player, level)->is_collidable)
+	if (!player->isJumping && player->isOnGround)
 	{
 		player->velocity.j = -PLAYER_JUMP_VELOCITY;
 		player->isJumping = TRUE;

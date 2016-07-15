@@ -32,6 +32,7 @@ typedef struct tagPlayer
 
 	int jumpHeight;
 	unsigned int isJumping : 1;
+	unsigned int isOnGround : 1;
 
 	unsigned int* bitmap;
 }Player;

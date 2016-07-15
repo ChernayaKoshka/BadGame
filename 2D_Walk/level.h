@@ -9,6 +9,7 @@
 #include "debug_custom.h"
 #include "file.h"
 #include "bitmap.h"
+#include "vector.h"
 
 #define SPRITE_HEIGHT 20
 #define SPRITE_WIDTH 20
@@ -40,6 +41,7 @@ typedef struct tagEntity
 
 	unsigned int is_enemy : 1;
 	unsigned int is_dangerous : 1;
+	unsigned int is_collidable : 1;
 }EntityInfo;
 
 typedef struct tagLevel

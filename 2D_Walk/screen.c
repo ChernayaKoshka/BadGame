@@ -6,7 +6,7 @@ WindowDetails* details;
 extern Player* player;
 extern Level* level;
 
-wchar_t* titleFormat = L"Pos: (%f,%f) Velocity Vector: <%f,%f>";
+wchar_t* titleFormat = L"Pos: (%1.2f,%1.2f) Velocity Vector: <%1.2f,%1.2f> IsJumping: %d IsOnGround: %d";
 wchar_t title[256];
 
 void Screen_HandleWindowEvents()
@@ -137,7 +137,7 @@ BOOL Screen_Init(HINSTANCE hInstance, int width, int height, wchar_t* className,
 
 void Screen_Render()
 {
-	swprintf_s(title, 256, titleFormat, player->pos.x, player->pos.y, player->velocity.i, player->velocity.j);
+	swprintf_s(title, 256, titleFormat, player->pos.x, player->pos.y, player->velocity.i, player->velocity.j, player->isJumping, player->isOnGround);
 	SetWindowTextW(details->Window, title);
 
 	Level_WriteToBuffer(level, details->BackBuffer, details->Width);
@@ -152,7 +152,7 @@ void Screen_Render()
 
 	for (int i = 0; i < level->entityCount; i++)
 	{
-		POINT* colPoints = Entities_GetEntityPoints(level->entities[i].entityId);
+		FloatPoint* colPoints = Entities_GetEntityPoints(level->entities[i].entityId);
 		for (int j = 0; j < 4; j++)
 			Plot(colPoints[j].x, colPoints[j].y, 0x00FFFFFF, details->BackBuffer, details->Width);
 		free(colPoints);

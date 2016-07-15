@@ -1,6 +1,6 @@
 #include "vector.h"
 
-Vector Vector_GetFromPoints(POINT p1, POINT p2)
+Vector Vector_GetFromPoints(FloatPoint p1, FloatPoint p2)
 {
 	Vector toReturn = { 0 };
 	toReturn.i = p2.x - p1.x;
@@ -66,7 +66,7 @@ POINT Vector_GetTerminalPoint(Vector v1, POINT offsetFromOrigin)
 
 //uses vectors for fancy stuff :)
 //formula: (0<AM[dot]AB<AB[dot]AB)/\(0<AM[dot]AD<AD[dot]AD) where M is a point an A,B,D are top left, top right, and bottom right respectively. [dot] represents the dot as in dot product.
-int Vector_RectContainsPoints(POINT rect[4], POINT point)
+int Vector_RectContainsPoints(FloatPoint rect[4], FloatPoint point)
 {
 	Vector AM = Vector_GetFromPoints(rect[0], point);
 	Vector AB = Vector_GetFromPoints(rect[0], rect[1]);

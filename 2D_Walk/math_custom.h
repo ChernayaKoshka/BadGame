@@ -11,12 +11,6 @@ typedef struct tagSlope
 	int dy;
 }Slope;
 
-typedef struct tagFloatPoint
-{
-	float x;
-	float y;
-}FloatPoint;
-
 int Greatest(int num, int num2);
 int Least(int num, int num2);
 int Difference(int num, int num2);
