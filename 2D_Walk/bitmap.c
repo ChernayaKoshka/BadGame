@@ -12,7 +12,7 @@ unsigned int* Bitmap_GetBytes(char* path)
 	{
 		swprintf_s(dbgData, sizeof(dbgData) / sizeof(wchar_t), unableToOpenFmt, path);
 		OutputDebugString(dbgData);
-		assert(fp);
+		assert(fp && !"Unable to load bitmap.");
 	}
 
 	long headerlessSize = File_GetSize(fp) - 54;
