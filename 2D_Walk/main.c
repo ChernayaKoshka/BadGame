@@ -28,6 +28,10 @@ void update(float timeAccumulated)
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
+#if _DEBUG
+	Debug_WriteTestData();
+#endif
+
 	/*INIT*/
 	if (!Time_Init())
 	{
@@ -65,9 +69,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 	/*END INIT*/
 
-#if _DEBUG
-	Debug_WriteTestData();
-#endif
 
 	float prevTime = 0;
 	float timeAccumulated = 0;
